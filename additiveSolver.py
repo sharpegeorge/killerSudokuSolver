@@ -15,20 +15,21 @@ def convertToRREF(matrix):
     return matrix.rref(pivots=False)
 
 
+# Assumes board is empty
 def additiveSolve(groups, sumPerGroup):
     # Each matrix column represents 1 cell from the board, if it needs to be solved, it's represented by a 1
 
     numGroups = len(groups)
     matrix = np.zeros(shape=(27 + numGroups, 82))
 
-    # equations for each board column
+    # Equations for each board column
     for columnNum in range(0, 9):
         matrixRow = columnNum
         matrix[matrixRow] = np.concatenate((
             np.repeat(0, columnNum * 9), np.repeat(1, 9), np.repeat(0, 81 - (columnNum + 1) * 9), [45]
         ))
 
-    # equations for each board row
+    # Equations for each board row
     for rowNum in range(0, 9):
         zeros = [0, 0, 0, 0, 0, 0, 0, 0, 0]
         zeros[rowNum] = 1
@@ -59,7 +60,7 @@ def additiveSolve(groups, sumPerGroup):
         matrixRow = boxNum + 18
         matrix[matrixRow] = newRow
 
-    # equations for each board cage
+    # Equations for each board cage
     for groupNum, group in enumerate(groups):
         groupSum = sumPerGroup[groupNum]
 

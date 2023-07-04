@@ -1,5 +1,30 @@
 from additiveSolver import additiveSolve
+from logicSolver import logicSolve
 import numpy as np
+
+
+board = np.zeros(shape=(9, 9))
+isBoardComplete = False
+maxIterations = 100
+iterationCounter = 0
+
+
+def checkBoardComplete():
+    return np.any(board == 0)
+
+
+def getCellPositionFromIndex(cellIndex):
+    cellRow = int(cellIndex // 9)
+    cellCol = int(cellIndex % 9)
+
+    return cellRow, cellCol
+
+
+def saveToBoardCell(cellIndex, cellValue):
+    cellRow, cellCol = getCellPositionFromIndex(cellIndex)
+
+    board[cellRow, cellCol] = cellValue
+
 
 # test data
 groups = [[0, 9], [1, 2], [3, 4, 12, 13], [5, 6, 14, 15, 24], [7, 8], [10, 11, 18, 19], [20, 21], [22, 23, 32, 33],
@@ -11,16 +36,27 @@ sumPerGroup = np.array(
     [8, 15, 20, 21, 10, 16, 13, 22, 20, 7, 16, 7, 6, 27, 9, 14, 18, 14, 8, 14, 11, 19, 9, 11, 20, 14, 9, 10, 10, 7])
 
 
-board = np.zeros(shape=(9, 9))
-
-results = additiveSolve(groups, sumPerGroup)
+# First using additiveSolve to get initial values
+additiveResults = additiveSolve(groups, sumPerGroup)
 
 # Add results to board
-for cell in results:
+for cell in additiveResults:
     cellIndex, cellValue = cell
-    cellRow = int(cellIndex // 9)
-    cellCol = int(cellIndex % 9)
+    saveToBoardCell(cellIndex, cellValue)
 
-    board[cellRow, cellCol] = cellValue
+# Logic solve until complete
+logicResults = logicSolve(board, groups, sumPerGroup)
+'''while (not isBoardComplete) and (iterationCounter < maxIterations):
+    iterationCounter += 1
+
+    logicResults = logicSolve(board, groups, sumPerGroup)
+
+    # Add results to board
+    for cell in logicResults:
+        cellIndex, cellValue = cell
+        saveToBoardCell(cellIndex, cellValue)
+
+    if checkBoardComplete():
+        isBoardComplete = True'''
 
 print(board)
