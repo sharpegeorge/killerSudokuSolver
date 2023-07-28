@@ -1,4 +1,6 @@
 import numpy as np
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 possibleBoardValues = np.zeros(shape=(9, 9, 9), dtype=bool)
 possibleBoardValues.fill(True)
@@ -30,6 +32,10 @@ def getPossibleCellValues(cellIndex=None, cellRow=None, cellCol=None):
 
 # Overrides current data, does not append
 def setPossibleCellValues(values, cellIndex=None, cellRow=None, cellCol=None):
+
+    if not cellIndex or not (cellRow and cellCol):
+        logging.debug("Not providing cellIndex or cellPosition")
+
     if cellIndex:
         cellRow, cellCol = getCellPositionFromIndex(cellIndex)
 
@@ -41,6 +47,21 @@ def setPossibleCellValues(values, cellIndex=None, cellRow=None, cellCol=None):
 
     updatePossibleValues(values, cellRow, cellCol)
     # triggers a check to see if it affects other possible cells
+    # maybe remove it from func
+
+
+def setIndividualPossibleCellValue(value, cellIndex=None, cellRow=None, cellCol=None):
+
+    if not cellIndex or not (cellRow and cellCol):
+        logging.debug("Not providing cellIndex or cellPosition")
+
+    if cellIndex:
+        cellRow, cellCol = getCellPositionFromIndex(cellIndex)
+
+    indexCorrected = int(value - 1)
+    possibleBoardValues[cellRow, cellCol, indexCorrected] = True
+
+def removeIndividualPossibleCellValue(value, cellIndex=None, cellRow=None, cellCol=None):
 
 
 # NEED TO MAKE FUNCTION TO SET INDIVIDUAL POSSIBLE VALUE OF A CELL
