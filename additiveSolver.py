@@ -1,5 +1,11 @@
 import numpy as np
 import sympy
+import sys
+
+np.set_printoptions(threshold=sys.maxsize)
+
+
+# need to analyse final matrix for more info. ie if row contains 3 1's (and positive final value) then those cells add up to final value
 
 
 def convertMatrixToNumpy(matrix):
@@ -13,6 +19,16 @@ def convertMatrixToSympy(matrix):
 def convertToRREF(matrix):
     # Requires matrix to be in sympy format
     return matrix.rref(pivots=False)
+
+
+def removeRowFromMatrix(rowIndex, matrix):
+    # Works by taking other rows from before and after the deleted row
+    # Then concatenates them together
+
+    matrixPartOne = matrix[:rowIndex]
+    matrixPartTwo = matrix[rowIndex + 1:]
+
+    return np.vstack((matrixPartOne, matrixPartTwo))
 
 
 # Assumes board is empty
@@ -75,16 +91,41 @@ def additiveSolve(groups, sumPerGroup):
         matrixRow = groupNum + 27
         matrix[matrixRow] = newRow
 
+    # Using sympy function1
     matrix = convertMatrixToSympy(matrix)
     matrix = convertToRREF(matrix)
     matrix = convertMatrixToNumpy(matrix)
 
+    # Removing any row of matrix ending with a negative number (or zero)
+    # Removing any row of matrix with negative value for a cell
+
+    # These are valid equations for the board, but aren't worth trying to use
+
+    rowIndex = 0
+    while rowIndex < matrix.shape[0]:
+        row = matrix[rowIndex]
+
+        # Checking end of row
+        if row[-1] < 1:
+            matrix = removeRowFromMatrix(rowIndex, matrix)
+
+        # Checking cell values
+        elif -1 in row[:-1]:
+            matrix = removeRowFromMatrix(rowIndex, matrix)
+
+        # Only increments in the else statement as the index will change everytime a row is removed
+        else:
+            rowIndex += 1
+
     # Analysing rref matrix to extract final cell results
+
+    print(matrix)
+    # ////////////////// analyse rows with multiple cells summing to 1 value
 
     rowIndexes = []
     pivotIndexes = []
 
-    for rowNum, row in enumerate(matrix):
+    for rowIndex, row in enumerate(matrix):
         counter = 0
         pivot = -1
         for elementNum, element in enumerate(row[:-1]):
@@ -102,7 +143,7 @@ def additiveSolve(groups, sumPerGroup):
         if counter > 1 or pivot == -1:
             continue
 
-        rowIndexes.append(rowNum)
+        rowIndexes.append(rowIndex)
         pivotIndexes.append(pivot)
 
     # Packing results to return
