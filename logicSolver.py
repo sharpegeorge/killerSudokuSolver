@@ -1,10 +1,9 @@
 import numpy as np
 import logging
+
 logging.basicConfig(level=logging.DEBUG)
 
-possibleBoardValues = np.zeros(shape=(9, 9, 9), dtype=bool)
-possibleBoardValues.fill(True)
-
+possibleBoardValues = np.full((9, 9, 9), True)
 
 
 def getCellPositionFromIndex(cellIndex):
@@ -32,8 +31,7 @@ def getPossibleCellValues(cellIndex=None, cellRow=None, cellCol=None):
 
 # Overrides current data, does not append
 def setPossibleCellValues(values, cellIndex=None, cellRow=None, cellCol=None):
-
-    if not cellIndex or not (cellRow and cellCol):
+    if cellIndex is None and (cellRow is None or cellCol is None):
         logging.debug("Not providing cellIndex or cellPosition")
 
     if cellIndex:
@@ -47,11 +45,12 @@ def setPossibleCellValues(values, cellIndex=None, cellRow=None, cellCol=None):
 
     updatePossibleValues(values, cellRow, cellCol)
     # triggers a check to see if it affects other possible cells
+    # would affect cage,row,column,box
+
     # maybe remove it from func
 
 
 def setIndividualPossibleCellValue(value, cellIndex=None, cellRow=None, cellCol=None):
-
     if not cellIndex or not (cellRow and cellCol):
         logging.debug("Not providing cellIndex or cellPosition")
 
@@ -61,26 +60,31 @@ def setIndividualPossibleCellValue(value, cellIndex=None, cellRow=None, cellCol=
     indexCorrected = int(value - 1)
     possibleBoardValues[cellRow, cellCol, indexCorrected] = True
 
+
+# Kept as a separate function from setValue function for abstraction
 def removeIndividualPossibleCellValue(value, cellIndex=None, cellRow=None, cellCol=None):
+    if not cellIndex or not (cellRow and cellCol):
+        logging.debug("Not providing cellIndex or cellPosition")
 
+    if cellIndex:
+        cellRow, cellCol = getCellPositionFromIndex(cellIndex)
 
-# NEED TO MAKE FUNCTION TO SET INDIVIDUAL POSSIBLE VALUE OF A CELL
+    indexCorrected = int(value - 1)
+    possibleBoardValues[cellRow, cellCol, indexCorrected] = False
 
 
 def updatePossibleValues(values, cellRow, cellCol):
     if len(values) == 1:
         print("placeholder updatePossibleValues ln50")
-        # remove value from column, row, box and group (will need to take cages/pairings into account)
+        # remove value from column, row, box and cage
+        # (will need to update cages/pairings)
 
-    # in column, row, box or group (individually tho):
-    # check for v (num values) cells with identical values
-        # if yes then remove values from all other set in the given column, row, box or group
-
-    # something else i forgor
-
+    # if values = values (in another len(values) cell(s) from same cage/col/row/box)
+    # remove values from that cage/col/row/box
+    # (will need to update cages/pairings)
 
 
-
+# Main function
 def logicSolve(board, groups, sumPerGroup):
     # Extracting data from board
     filledCellRows, filledCellCols = np.nonzero(board)
@@ -91,4 +95,5 @@ def logicSolve(board, groups, sumPerGroup):
         cellValue = board[cellRow, cellCol]
         setPossibleCellValues(np.array([cellValue]), cellRow=cellRow, cellCol=cellCol)
 
-    print(possibleBoardValues)
+    # final output should be possibleBoardValues where each cell has only 1 value
+    return possibleBoardValues
