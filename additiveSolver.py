@@ -31,6 +31,26 @@ def removeRowFromMatrix(rowIndex, matrix):
     return np.vstack((matrixPartOne, matrixPartTwo))
 
 
+def getPartitions(total, numOfIntegers):
+    maxCellValue = 9
+    groupPartitions = []
+
+    for currentPartition in partitions(total, k=maxCellValue, m=numOfIntegers):
+
+        # Removing partitions which aren't feasible in sudoku
+        duplicateValues = not all(x == 1 for x in currentPartition.values())
+        numEntries = len(currentPartition)
+
+        if duplicateValues or (numEntries != numOfIntegers):
+            continue
+
+        # Changing format
+        formattedPartition = tuple(currentPartition)
+        groupPartitions.append(formattedPartition)
+
+    return groupPartitions
+
+
 # Assumes board is empty
 def additiveSolve(groups, sumPerGroup):
     # Each matrix column represents 1 cell from the board, if it needs to be solved, it's represented by a 1
@@ -99,7 +119,7 @@ def additiveSolve(groups, sumPerGroup):
     # Removing any row of matrix ending with a negative number (or zero)
     # Removing any row of matrix with negative value for a cell
 
-    # These are valid equations for the board, but aren't worth trying to use
+    # These are valid equations for the board, but are too problematic to use
 
     rowIndex = 0
     while rowIndex < matrix.shape[0]:
@@ -117,37 +137,37 @@ def additiveSolve(groups, sumPerGroup):
         else:
             rowIndex += 1
 
-    # Analysing rref matrix to extract final cell results
-
-    print(matrix)
-    # ////////////////// analyse rows with multiple cells summing to 1 value
-
+    # Analysing rref matrix to extract final cell results and possible cell values
     rowIndexes = []
     pivotIndexes = []
+    numCellsThreshold = 4
+    allPartitionsInfo = []
 
     for rowIndex, row in enumerate(matrix):
-        counter = 0
-        pivot = -1
-        for elementNum, element in enumerate(row[:-1]):
 
-            if element == 0:
-                continue
+        rowWithoutSum = row[:-1]
+        total = int(row[-1])
+        numberOfOnes = numpyCount(rowWithoutSum, 1)
 
-            counter += 1
-            if counter > 1:
-                break
-
-            if element == 1:
-                pivot = elementNum
-
-        if counter > 1 or pivot == -1:
+        # Optional, may improve speed by reducing unnecessary partitions with too many cells involved
+        if numberOfOnes > numCellsThreshold:
             continue
 
-        rowIndexes.append(rowIndex)
-        pivotIndexes.append(pivot)
+        # Getting final values
+        if numberOfOnes == 1:
+            pivotIndex = numpyIndexesOf(rowWithoutSum, 1)[0]
+            rowIndexes.append(rowIndex)
+            pivotIndexes.append(pivotIndex)
+
+        # Getting possible cell values by looking at partitions provided by matrix
+        if numberOfOnes > 1:
+            pivots = numpyIndexesOf(rowWithoutSum, 1)
+
+            currentPartitions = getPartitions(total, numberOfOnes)
+            partitionInfo = (pivots, currentPartitions)
+            allPartitionsInfo.append(partitionInfo)
 
     # Packing results to return
-
     results = np.empty(shape=(len(rowIndexes), 2))
 
     for rowNum, rowIndex in enumerate(rowIndexes):
@@ -156,4 +176,4 @@ def additiveSolve(groups, sumPerGroup):
 
         results[rowNum] = cellIndex, cellValue
 
-    return results
+    return results, allPartitionsInfo
