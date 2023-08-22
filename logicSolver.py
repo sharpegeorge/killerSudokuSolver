@@ -75,7 +75,7 @@ def removeIndividualPossibleCellValue(value, cellIndex=None, cellRow=None, cellC
 
 def updatePossibleValues(values, cellRow, cellCol):
     if len(values) == 1:
-        print("placeholder updatePossibleValues ln50")
+        print("placeholder updatePossibleValues ln78 logicSolver")
         # remove value from column, row, box and cage
         # (will need to update cages/pairings)
 

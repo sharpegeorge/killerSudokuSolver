@@ -5,7 +5,7 @@ import numpy as np
 
 board = np.zeros(shape=(9, 9))
 isBoardComplete = False
-maxIterations = 100
+maxIterations = 1000
 iterationCounter = 0
 
 
@@ -37,7 +37,7 @@ sumPerGroup = np.array(
 
 
 # First using additiveSolve to get initial values
-additiveResults = additiveSolve(groups, sumPerGroup)
+additiveResults, partitions = additiveSolve(groups, sumPerGroup)
 
 # Add results to board
 for cell in additiveResults:
