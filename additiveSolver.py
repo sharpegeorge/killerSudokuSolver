@@ -1,11 +1,14 @@
 import numpy as np
 import sympy
-import sys
-
-np.set_printoptions(threshold=sys.maxsize)
+from sympy.utilities.iterables import partitions
 
 
-# need to analyse final matrix for more info. ie if row contains 3 1's (and positive final value) then those cells add up to final value
+def numpyIndexesOf(array, value):
+    return np.argwhere(array == value).flatten()
+
+
+def numpyCount(array, value):
+    return np.count_nonzero(array == value)
 
 
 def convertMatrixToNumpy(matrix):
