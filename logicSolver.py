@@ -1,9 +1,30 @@
 import numpy as np
 import logging
+from sympy.utilities.iterables import partitions
 
 logging.basicConfig(level=logging.DEBUG)
 
 possibleBoardValues = np.full((9, 9, 9), True)
+
+
+def getPartitions(total, numOfIntegers):
+    maxCellValue = 9
+    groupPartitions = []
+
+    for currentPartition in partitions(total, k=maxCellValue, m=numOfIntegers):
+
+        # Removing partitions which aren't feasible in sudoku
+        duplicateValues = not all(x == 1 for x in currentPartition.values())
+        numEntries = len(currentPartition)
+
+        if duplicateValues or (numEntries != numOfIntegers):
+            continue
+
+        # Changing format
+        formattedPartition = tuple(currentPartition)
+        groupPartitions.append(formattedPartition)
+
+    return groupPartitions
 
 
 def getCellPositionFromIndex(cellIndex):
