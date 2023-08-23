@@ -143,18 +143,18 @@ def additiveSolve(groups, sumPerGroup):
     # Analysing rref matrix to extract final cell results and possible cell values
     rowIndexes = []
     pivotIndexes = []
-    numCellsThreshold = 4
-    allPartitionsInfo = []
+    '''numCellsThreshold = 4
+    allPartitionsInfo = []'''
 
     for rowIndex, row in enumerate(matrix):
 
         rowWithoutSum = row[:-1]
-        total = int(row[-1])
+        '''total = int(row[-1])'''
         numberOfOnes = numpyCount(rowWithoutSum, 1)
 
-        # Optional, may improve speed by reducing unnecessary partitions with too many cells involved
+        '''# Optional, may improve speed by reducing unnecessary partitions with too many cells involved
         if numberOfOnes > numCellsThreshold:
-            continue
+            continue'''
 
         # Getting final values
         if numberOfOnes == 1:
@@ -162,13 +162,12 @@ def additiveSolve(groups, sumPerGroup):
             rowIndexes.append(rowIndex)
             pivotIndexes.append(pivotIndex)
 
-        # Getting possible cell values by looking at partitions provided by matrix
         if numberOfOnes > 1:
             pivots = numpyIndexesOf(rowWithoutSum, 1)
 
             currentPartitions = getPartitions(total, numberOfOnes)
             partitionInfo = (pivots, currentPartitions)
-            allPartitionsInfo.append(partitionInfo)
+            allPartitionsInfo.append(partitionInfo)'''
 
     # Packing results to return
     results = np.empty(shape=(len(rowIndexes), 2))
@@ -179,4 +178,6 @@ def additiveSolve(groups, sumPerGroup):
 
         results[rowNum] = cellIndex, cellValue
 
-    return results, allPartitionsInfo
+    return results
+
+    ''', allPartitionsInfo'''
