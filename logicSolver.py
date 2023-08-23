@@ -196,13 +196,13 @@ def updatePossibleValues(cellRow, cellCol, groups, sumPerGroup):
             if value in currentCellValues:
                 removeIndividualPossibleCellValue(value, groups, sumPerGroup, cellIndex=currentCellIndex)
 
-        # Needs to update rest of group base on groupsum (use partitions)
+        # Needs to update rest of group base on groupsum (use partitions) - maybe subtract "complete" sets of cells from groupsum
         '''1//////////////////////'''
 
     '''2//////////////////////'''
     # if values = values (in another len(values) cell(s) from same cage/col/row/box)
     # remove values from that cage/col/row/box
-    # (will need to update cages/pairings)
+    # (will need to update cages/pairings) - maybe subtract "complete" sets of cells from groupsum then update partitions
 
 
 # Main function
