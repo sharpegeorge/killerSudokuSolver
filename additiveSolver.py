@@ -162,6 +162,7 @@ def additiveSolve(groups, sumPerGroup):
             rowIndexes.append(rowIndex)
             pivotIndexes.append(pivotIndex)
 
+        ''''# Getting possible cell values by looking at partitions provided by matrix
         if numberOfOnes > 1:
             pivots = numpyIndexesOf(rowWithoutSum, 1)
 
