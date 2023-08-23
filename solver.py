@@ -9,6 +9,14 @@ maxIterations = 1000
 iterationCounter = 0
 
 
+def numpyIndexesOf(array, value):
+    return np.argwhere(array == value).flatten()
+
+
+def numpyCount(array, value):
+    return np.count_nonzero(array == value)
+
+
 def checkBoardComplete():
     return np.any(board == 0)
 
@@ -37,26 +45,27 @@ sumPerGroup = np.array(
 
 
 # First using additiveSolve to get initial values
-additiveResults, partitions = additiveSolve(groups, sumPerGroup)
+additiveResults = additiveSolve(groups, sumPerGroup)
 
 # Add results to board
 for cell in additiveResults:
     cellIndex, cellValue = cell
     saveToBoardCell(cellIndex, cellValue)
 
-# Logic solve until complete
+# Using backtracking algorithm
 logicResults = logicSolve(board, groups, sumPerGroup)
-'''while (not isBoardComplete) and (iterationCounter < maxIterations):
-    iterationCounter += 1
 
-    logicResults = logicSolve(board, groups, sumPerGroup)
+# Format result from algorithms into readable format
+for rowNum, row in enumerate(logicResults):
+    for colNum, cell in enumerate(row):
 
-    # Add results to board
-    for cell in logicResults:
-        cellIndex, cellValue = cell
-        saveToBoardCell(cellIndex, cellValue)
+        if numpyCount(cell, True) == 0:
+            print("Solver.py error - logicSolver returned a cell with no possible values")
 
-    if checkBoardComplete():
-        isBoardComplete = True'''
+        if numpyCount(cell, True) != 1:
+            continue
+
+        value = numpyIndexesOf(cell, True)[0] + 1
+        board[rowNum, colNum] = value
 
 print(board)
