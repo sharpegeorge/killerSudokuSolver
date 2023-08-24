@@ -20,6 +20,26 @@ boxes = np.array([
 ])
 
 
+def indexesOfSpecificArrayInList(listArray, array):
+    indexes = []
+
+    for index, currentArray in enumerate(listArray):
+        if np.array_equal(currentArray, array):
+            indexes.append(index)
+
+    return indexes
+
+
+def countSpecificArraysInListOfArrays(listArrays, array):
+    count = 0
+
+    for currentArray in listArrays:
+        if np.array_equal(currentArray, array):
+            count += 1
+
+    return count
+
+
 def getPartitions(total, numOfIntegers):
     maxCellValue = 9
     groupPartitions = []
@@ -48,7 +68,6 @@ def getIndex2DList(value, arr):
     return None
 
 
-
 def getCellPositionFromIndex(cellIndex):
     cellRow = int(cellIndex // 9)
     cellCol = int(cellIndex % 9)
@@ -62,7 +81,25 @@ def getCellIndexFromPosition(cellRow, cellCol):
     return cellIndex
 
 
-def getPossibleCellValues(value=None, cellIndex=None, cellRow=None, cellCol=None):
+def getColumnValues(cellCol):
+    columnValues = []
+
+    for row in range(9):
+        columnValues.append(getPossibleCellValues(cellRow=row, cellCol=cellCol))
+
+    return columnValues
+
+
+def getRowValues(cellRow):
+    rowValues = []
+
+    for col in range(9):
+        rowValues.append(getPossibleCellValues(cellRow=cellRow, cellCol=col))
+
+    return rowValues
+
+
+def getPossibleCellValues(cellIndex=None, cellRow=None, cellCol=None):
     if cellIndex is None and (cellRow is None or cellCol is None):
         logging.debug("Not providing cellIndex or cellPosition a")
 
@@ -70,13 +107,6 @@ def getPossibleCellValues(value=None, cellIndex=None, cellRow=None, cellCol=None
         cellRow, cellCol = getCellPositionFromIndex(cellIndex)
 
     results = np.array([])
-
-    if value is not None:
-        indexCorrected = int(value - 1)
-        cellValue = possibleBoardValues[cellRow, cellCol, indexCorrected]
-        results = np.append(results, cellValue)
-
-        return results
 
     cellValuesBool = possibleBoardValues[cellRow, cellCol]
     '''print(cellValuesBool)'''
@@ -134,6 +164,26 @@ def removeIndividualPossibleCellValue(value, groups, sumPerGroup, cellIndex=None
     updatePossibleValues(cellRow, cellCol, groups, sumPerGroup)
 
 
+def removeIdenticalValuesFromColumnExcept(identicalCellRows, values, column, groups, sumPerGroup):
+    for currentCellRow in range(9):
+
+        if currentCellRow in identicalCellRows:
+            continue
+
+        for value in values:
+            removeIndividualPossibleCellValue(value, groups, sumPerGroup, cellRow=currentCellRow, cellCol=column)
+
+
+def removeIdenticalValuesFromRowExcept(identicalCellColumns, values, row, groups, sumPerGroup):
+    for currentCellCol in range(9):
+
+        if currentCellCol in identicalCellColumns:
+            continue
+
+        for value in values:
+            removeIndividualPossibleCellValue(value, groups, sumPerGroup, cellRow=row, cellCol=currentCellCol)
+
+
 def updatePossibleValues(cellRow, cellCol, groups, sumPerGroup):
     possibleValues = getPossibleCellValues(cellRow=cellRow, cellCol=cellCol)
     cellIndex = getCellIndexFromPosition(cellRow, cellCol)
@@ -152,7 +202,6 @@ def updatePossibleValues(cellRow, cellCol, groups, sumPerGroup):
             if value in currentCellValues:
                 removeIndividualPossibleCellValue(value, groups, sumPerGroup, cellRow=cellRow, cellCol=currentColumn)
 
-
         # Removes value of passed cell from any cells in the same column
         for currentRow in range(9):
             if currentRow == cellRow:
@@ -162,7 +211,6 @@ def updatePossibleValues(cellRow, cellCol, groups, sumPerGroup):
 
             if value in currentCellValues:
                 removeIndividualPossibleCellValue(value, groups, sumPerGroup, cellRow=currentRow, cellCol=cellCol)
-
 
         # Getting the box the cell belongs to
 
@@ -180,7 +228,6 @@ def updatePossibleValues(cellRow, cellCol, groups, sumPerGroup):
             if value in currentCellValues:
                 removeIndividualPossibleCellValue(value, groups, sumPerGroup, cellIndex=currentCellIndex)
 
-
         # Getting the group the cell belongs to
 
         groupIndex = getIndex2DList(cellIndex, groups)
@@ -196,13 +243,53 @@ def updatePossibleValues(cellRow, cellCol, groups, sumPerGroup):
             if value in currentCellValues:
                 removeIndividualPossibleCellValue(value, groups, sumPerGroup, cellIndex=currentCellIndex)
 
-        # Needs to update rest of group base on groupsum (use partitions) - maybe subtract "complete" sets of cells from groupsum
-        '''1//////////////////////'''
+        # subtract value from specific groupsum
 
-    '''2//////////////////////'''
-    # if values = values (in another len(values) cell(s) from same cage/col/row/box)
-    # remove values from that cage/col/row/box
-    # (will need to update cages/pairings) - maybe subtract "complete" sets of cells from groupsum then update partitions
+        # Needs to update rest of group base on groupsum (use partitions)
+        '''2//////////////////////'''
+        return
+
+
+    # Identifying and removing any possible values from cells in the same column/row/box/group
+
+
+    columnPossibleValues = getColumnValues(cellCol)
+    numIdenticalCellsInCol = countSpecificArraysInListOfArrays(columnPossibleValues, possibleValues)
+    identicalCellRows = indexesOfSpecificArrayInList(columnPossibleValues, possibleValues)
+
+    if numIdenticalCellsInCol == len(possibleValues):
+        removeIdenticalValuesFromColumnExcept(identicalCellRows, possibleValues, cellCol, groups, sumPerGroup)
+
+
+    rowPossibleValues = getRowValues(cellRow)
+    numIdenticalCellsInRow = countSpecificArraysInListOfArrays(rowPossibleValues, possibleValues)
+    identicalCellCols = indexesOfSpecificArrayInList(rowPossibleValues, possibleValues)
+
+    if numIdenticalCellsInRow == len(possibleValues):
+        removeIdenticalValuesFromRowExcept(identicalCellCols, possibleValues, cellRow, groups, sumPerGroup)
+
+
+    # count possibleValues in 2d array of box values
+    # if ^count == len(possibleValues):
+    # remove possibleValues from other cells in the box
+
+
+    '''1//////////////////////////////////'''
+    groupPossibleValues = getGroupValues(cellRow, cellCol)
+    numIdenticalCellsInGroup = countSpecificArraysInListOfArrays(groupPossibleValues, possibleValues)
+    # identicalGroupCellIndexes = ...
+
+    if numIdenticalCellsInGroup == len(possibleValues):
+        removeIdenticalValuesFromGroupExcept(identicalGroupCellIndexes, possibleValues, cellRow, cellCol, groups, sumPerGroup)
+
+    # if len(partitions) == 1
+    # subtract sum(partitions) from specific groupsum
+    # remove possibleValues from other cells in the group
+
+
+
+    '''3//////////////////////'''
+    # (will need to update cages/pairings)
 
 
 # Main function
