@@ -99,6 +99,36 @@ def getRowValues(cellRow):
     return rowValues
 
 
+def getBoxIndexes(cellRow, cellCol):
+    groupIndexes = []
+    groupRow = cellRow // 3
+    groupCol = cellCol // 3
+
+    for cell in range(9):
+        currentRow = (cell // 3) + (groupRow * 3)
+        currentCol = (cell % 3) + (groupCol * 3)
+
+        groupIndexes.append(getCellIndexFromPosition(currentRow, currentCol))
+
+    return groupIndexes
+
+
+
+def getBoxValues(cellRow, cellCol):
+    groupValues = []
+    groupRow = cellRow // 3
+    groupCol = cellCol // 3
+
+
+    for cell in range(9):
+        currentRow = (cell // 3) + (groupRow * 3)
+        currentCol = (cell % 3) + (groupCol * 3)
+        groupValues.append(getPossibleCellValues(cellRow=currentRow, cellCol= currentCol))
+
+
+    return groupValues
+
+
 def getPossibleCellValues(cellIndex=None, cellRow=None, cellCol=None):
     if cellIndex is None and (cellRow is None or cellCol is None):
         logging.debug("Not providing cellIndex or cellPosition a")
@@ -109,7 +139,6 @@ def getPossibleCellValues(cellIndex=None, cellRow=None, cellCol=None):
     results = np.array([])
 
     cellValuesBool = possibleBoardValues[cellRow, cellCol]
-    '''print(cellValuesBool)'''
 
     for cellIndex, cellValueBool in enumerate(cellValuesBool):
         if cellValueBool:
@@ -165,23 +194,36 @@ def removeIndividualPossibleCellValue(value, groups, sumPerGroup, cellIndex=None
 
 
 def removeIdenticalValuesFromColumnExcept(identicalCellRows, values, column, groups, sumPerGroup):
-    for currentCellRow in range(9):
+    for currentRow in range(9):
 
-        if currentCellRow in identicalCellRows:
+        if currentRow in identicalCellRows:
             continue
 
         for value in values:
-            removeIndividualPossibleCellValue(value, groups, sumPerGroup, cellRow=currentCellRow, cellCol=column)
+            removeIndividualPossibleCellValue(value, groups, sumPerGroup, cellRow=currentRow, cellCol=column)
 
 
 def removeIdenticalValuesFromRowExcept(identicalCellColumns, values, row, groups, sumPerGroup):
-    for currentCellCol in range(9):
+    for currentCol in range(9):
 
-        if currentCellCol in identicalCellColumns:
+        if currentCol in identicalCellColumns:
             continue
 
         for value in values:
-            removeIndividualPossibleCellValue(value, groups, sumPerGroup, cellRow=row, cellCol=currentCellCol)
+            removeIndividualPossibleCellValue(value, groups, sumPerGroup, cellRow=row, cellCol=currentCol)
+
+
+def removeIdenticalValuesFromBoxExcept(identicalBoxCellIndexes, values, row, column, groups, sumPerGroup):
+    boxIndexes = getBoxIndexes(row, column)
+
+    for index in boxIndexes:
+        currentRow, currentCol = getCellPositionFromIndex(index)
+
+        if index in identicalBoxCellIndexes:
+            continue
+
+        for value in values:
+            removeIndividualPossibleCellValue(value, groups, sumPerGroup, cellRow=currentRow, cellCol=currentCol)
 
 
 def updatePossibleValues(cellRow, cellCol, groups, sumPerGroup):
@@ -250,8 +292,7 @@ def updatePossibleValues(cellRow, cellCol, groups, sumPerGroup):
         return
 
 
-    # Identifying and removing any possible values from cells in the same column/row/box/group
-
+    # Identifying and removing any possible values from cells in the same column
 
     columnPossibleValues = getColumnValues(cellCol)
     numIdenticalCellsInCol = countSpecificArraysInListOfArrays(columnPossibleValues, possibleValues)
@@ -261,6 +302,8 @@ def updatePossibleValues(cellRow, cellCol, groups, sumPerGroup):
         removeIdenticalValuesFromColumnExcept(identicalCellRows, possibleValues, cellCol, groups, sumPerGroup)
 
 
+    # Identifying and removing any possible values from cells in the same row
+
     rowPossibleValues = getRowValues(cellRow)
     numIdenticalCellsInRow = countSpecificArraysInListOfArrays(rowPossibleValues, possibleValues)
     identicalCellCols = indexesOfSpecificArrayInList(rowPossibleValues, possibleValues)
@@ -269,22 +312,36 @@ def updatePossibleValues(cellRow, cellCol, groups, sumPerGroup):
         removeIdenticalValuesFromRowExcept(identicalCellCols, possibleValues, cellRow, groups, sumPerGroup)
 
 
-    # count possibleValues in 2d array of box values
+    # Identifying and removing any possible values from cells in the same box
+
+    boxPossibleValues = getBoxValues(cellRow, cellCol)
+    numIdenticalCellsInGroup = countSpecificArraysInListOfArrays(boxPossibleValues, possibleValues)
+
+    identicalGroupCells = indexesOfSpecificArrayInList(boxPossibleValues, possibleValues)
+    groupIndexes = getBoxIndexes(cellRow, cellCol)
+    identicalGroupCellIndexes = [groupIndexes[index] for index in identicalGroupCells]
+
+    if numIdenticalCellsInGroup == len(possibleValues):
+        removeIdenticalValuesFromBoxExcept(identicalGroupCellIndexes, possibleValues, cellRow, cellCol, groups, sumPerGroup)
+
+        # if len(partitions of cellRow and cellCol) == 1
+        # subtract sum(partitions) from specific groupsum
+        # remove possibleValues from other cells in the group
+
+
+    # Identifying and removing any possible values from cells in the same group
+
+    '''1//////////////////////////////////'''
+    # count possibleValues in 2d array of group values
     # if ^count == len(possibleValues):
     # remove possibleValues from other cells in the box
 
 
-    '''1//////////////////////////////////'''
-    groupPossibleValues = getGroupValues(cellRow, cellCol)
-    numIdenticalCellsInGroup = countSpecificArraysInListOfArrays(groupPossibleValues, possibleValues)
-    # identicalGroupCellIndexes = ...
+    #
 
-    if numIdenticalCellsInGroup == len(possibleValues):
-        removeIdenticalValuesFromGroupExcept(identicalGroupCellIndexes, possibleValues, cellRow, cellCol, groups, sumPerGroup)
-
-    # if len(partitions) == 1
-    # subtract sum(partitions) from specific groupsum
-    # remove possibleValues from other cells in the group
+    '''groupIndex = getIndex2DList(cellIndex, groups)
+    groupTotal = sumPerGroup[groupIndex]
+    numGroupEntries = len(groups[groupIndex])'''
 
 
 
