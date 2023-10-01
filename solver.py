@@ -60,7 +60,7 @@ for rowNum, row in enumerate(logicResults):
     for colNum, cell in enumerate(row):
 
         if numpyCount(cell, True) == 0:
-            print("Solver.py error - logicSolver returned a cell with no possible values")
+            print("Solver.py error - logicSolver returned a cell with no possible values - ", rowNum + 1, colNum + 1)
 
         if numpyCount(cell, True) != 1:
             continue
