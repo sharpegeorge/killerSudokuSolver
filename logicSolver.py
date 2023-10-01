@@ -493,11 +493,6 @@ def logicSolve(board, groupsPassed, sumPerGroupPassed):
 
                 removeIndividualPossibleCellValue(value, cellIndex=cellIndex)
 
-    # final output should be possibleBoardValues where each cell has only 1 value
-    for currentCellIndex in range(0, 81):
-        cellRow, cellCol = getCellPositionFromIndex(currentCellIndex)
-        updatePossibleValues(cellRow, cellCol)
-
-    print(possibleBoardValues)
+    # Final output should be possibleBoardValues where each cell has only 1 value
 
     return possibleBoardValues
